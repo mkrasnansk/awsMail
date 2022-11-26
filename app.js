@@ -70,3 +70,4 @@ const run = async (params) => {
 
 app.listen(port || 5000);
 
+export default app

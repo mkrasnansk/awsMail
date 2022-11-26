@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 
 const sesClient = new SESClient();
 
-app.post("/mail", (req, res) => {
+app.post("/mail", cors(corsOptions), (req, res) => {
    let data = req.body;
 
    const html_contents = `

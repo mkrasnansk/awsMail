@@ -2,9 +2,13 @@ import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import { SESClient, SendEmailCommand, SES } from "@aws-sdk/client-ses";
 
 const app = express();
 dotenv.config();
+const port = process.env.PORT;
+
+console.log(port);
 
 app.use(express.urlencoded());
 app.use(bodyParser.json());
@@ -21,21 +25,49 @@ app.use((req, res, next) => {
    next();
 });
 
-app.post("/mail", cors(corsOptions), (req, res) => {
+const sesClient = new SESClient();
+
+app.post("/mail", (req, res) => {
    let data = req.body;
-   console.log(data);
+
+   const html_contents = `
+        <html>
+            <h1 style='align:center'>Meno: ${data.name} ${data.last}</h1>
+            <h3 style='align:center'>email: ${data.email}</h3>
+            <p style='color:red'><strong>SERVICE: ${data.service} </strong></p>
+            <p >Message: ${data.message}</p>
+        </html>
+            `;
+   const params = {
+      Destination: {
+         ToAddresses: ["miso.krasnansky@gmail.com"],
+      },
+      Message: {
+         Body: {
+            Html: { Charset: "UTF-8", Data: html_contents },
+         },
+         Subject: { Charset: "UTF-8", Data: "subject  html template" },
+      },
+      Source: "miso.krasnansky@gmail.com",
+   };
+
    if (!data.url) {
-      res.status(500).send({ website: data.url, error: "Missing url" });
-      return res;
+      throw new Error("no URL");
    } else {
-      res.status(200).send({ website: data.url, websiteStatus: response.status });
-      if (response.status !== 200) {
-         sendMail(data, response.status);
-      }
-      return res;
+      run(params);
+      console.log(data);
    }
 });
 
-app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}...`);
-  });
+const run = async (params) => {
+   try {
+      const data = await sesClient.send(new SendEmailCommand(params));
+      console.log(data);
+   } catch (error) {
+      console.log(error);
+   }
+};
+
+app.listen(port || 5000);
+
+export default app;

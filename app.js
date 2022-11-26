@@ -6,7 +6,6 @@ import { SESClient, SendEmailCommand, SES } from "@aws-sdk/client-ses";
 
 const app = express();
 dotenv.config();
-const port = process.env.PORT;
 
 console.log(port);
 
@@ -71,6 +70,6 @@ const run = async (params) => {
    }
 };
 
-app.listen(port || 5000);
+app.listen(process.env.PORT || 5000);
 
 // export default app

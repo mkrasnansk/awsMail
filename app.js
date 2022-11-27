@@ -1,24 +1,26 @@
 import express from "express";
-// import cors from "cors";
+import cors from "cors";
+import helmet from "helmet";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import { SESClient, SendEmailCommand, SES } from "@aws-sdk/client-ses";
 
 const app = express();
+
 dotenv.config();
 
 console.log(port);
 
 // AWS.config.update({ region: "eu-central-1" });
 
-
 app.use(express.urlencoded());
 app.use(bodyParser.json());
+app.use(helmet())
 
-// const corsOptions = {
-//    origin: "*",
-//    // origin: ["https://www.owee.sk", "www.owee.sk", "owee.sk", "https://owee.sk", "https://owee-15664.firebaseapp.com", "https://owee-15664.web.app", "https://www.tiendapepe.sk"],
-// };
+const corsOptions = {
+   origin: "*",
+   // origin: ["https://www.owee.sk", "www.owee.sk", "owee.sk", "https://owee.sk", "https://owee-15664.firebaseapp.com", "https://owee-15664.web.app", "https://www.tiendapepe.sk"],
+};
 app.use(cors(corsOptions));
 // app.use((req, res, next) => {
 //    res.setHeader("Access-Control-Allow-Origin", "*");
@@ -29,7 +31,7 @@ app.use(cors(corsOptions));
 
 const sesClient = new SESClient();
 
-app.post("/mail",  (req, res) => {
+app.post("/mail", cors(corsOptions), (req, res) => {
    let data = req.body;
 
    const html_contents = `
